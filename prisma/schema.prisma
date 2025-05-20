@@ -72,6 +72,7 @@ model UserDescription {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
+  @@index([userId])
   @@map("user_descriptions")
 }
 
@@ -104,6 +105,7 @@ model Product {
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
+  @@index([categoryId])
   @@map("products")
 }
 
@@ -119,6 +121,8 @@ model Cart {
   updatedAt  DateTime @updatedAt
 
   @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
   @@map("carts")
 }
 
@@ -132,11 +136,12 @@ model Order {
   shippingAddress String        @map("shipping_address")
   totalAmount     Float         @map("total_amount")
   paymentStatus   PaymentStatus @map("payment_status")
-  payment         Payment? @relation("OrderToPayment")
+  payment         Payment?
   orderItems      OrderItem[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 
+  @@index([userId])
   @@map("orders")
 }
 
@@ -154,19 +159,23 @@ model OrderItem {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  @@index([orderId])
+  @@index([productId])
   @@map("order_items")
 }
 
-// Payment model (you can expand based on actual fields later)
+// Payment model
 model Payment {
-  id        Int      @id @default(autoincrement())
-  orderId   Int
-  order     Order @relation("OrderToPayment", fields: [orderId], references: [id], onDelete: Cascade)
-
+  id        Int           @id @default(autoincrement()) @map("payment_id")
+  orderId   Int           @unique @map("order_id")
+  order     Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
   method    String
   amount    Float
   status    PaymentStatus
-  paidAt    DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  paidAt    DateTime?     @map("paid_at")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([orderId])
+  @@map("payments")
 }
